@@ -93,7 +93,7 @@ def get_history():
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok", "version" "1.1"})
 
 @app.route("/metrics")
 def metrics():
