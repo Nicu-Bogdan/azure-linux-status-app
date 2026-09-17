@@ -49,6 +49,19 @@ services:
       - grafana_data:/var/lib/grafana
     ports:
       - "3000:3000"
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_NAME: statusdb
+      DB_USER: statususer
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      PYTHONPATH: /app
 
 
 volumes:

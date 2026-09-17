@@ -6,8 +6,24 @@ on:
       - main
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_PASSWORD: ci-test-password
+      GRAFANA_ADMIN_PASSWORD: ci-test-password
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Run integration tests
+        run: docker compose run --rm --build test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3

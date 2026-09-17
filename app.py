@@ -11,7 +11,7 @@ app = Flask(__name__)
 DB_HOST = os.environ.get("DB_HOST", "db")
 DB_NAME = os.environ.get("DB_NAME", "statusdb")
 DB_USER = os.environ.get("DB_USER", "statususer")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "changeme")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
 snapshot_counter = Counter('app_snapshots_total', 'Numarul total de snapshot-uri create')
 cpu_gauge = Gauge('app_last_cpu_percent', 'Ultimul CPU procentual masurat')
@@ -91,16 +91,42 @@ def get_history():
     ]
     return jsonify(history)
 
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok", "version": "1.1"})
+@app.route("/health/live", methods=["GET"])
+def health_live():
+    return jsonify({
+        "status": "ok",
+        "version": "1.1"
+    }), 200
 
+
+@app.route("/health/ready", methods=["GET"])
+def health_ready():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("SELECT 1")
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "status": "ok",
+            "version": "1.1",
+            "database": "ok"
+        }), 200
+
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "version": "1.1",
+            "database": "unavailable"
+        }), 503
 @app.route("/metrics")
+
 def metrics():
     return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
-
-init_db()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
