@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY tests/ tests/
 
-CMD ["python", "-m", "pytest", "-v"]
+CMD ["sh", "-c", "python -c \"from app import init_db; init_db()\" && python -m pytest -v"]
