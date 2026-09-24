@@ -35,3 +35,13 @@ jobs:
             cd ~/status-app
             git pull origin main
             docker compose up -d --build
+  smoke_test:
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Production smoke test
+        run: |
+          response=$(curl -fsS https://vm01-linux.duckdns.org/health/ready)
+          echo "$response"
+          echo "$response" | grep -Eq '"database"[[:space:]]*:[[:space:]]*"ok"'
